@@ -1,8 +1,9 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { CssBaseline, Typography } from '@mui/material';
+import { Box, CssBaseline, Typography } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from '../theme';
+import SearchAppBar from '../components/SearchAppBar';
 
 const VideoPlayer: React.FC = () => {
   const { videoId } = useParams<{ videoId: string }>();
@@ -10,7 +11,8 @@ const VideoPlayer: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <div style={{ padding: '20px' }}>
+      <Box style={{ background: theme.palette.background.default, color: theme.palette.text.primary }}>
+      <SearchAppBar />
         <Typography variant="h4">Video Player</Typography>
         <iframe
           width="560"
@@ -19,7 +21,7 @@ const VideoPlayer: React.FC = () => {
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
         ></iframe>
-      </div>
+      </Box>
     </ThemeProvider>
   );
 };

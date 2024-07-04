@@ -6,12 +6,16 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
-import { Drawer, List, ListItem, ListItemText } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Drawer, List, ListItem, ListItemText, Paper, ClickAwayListener } from '@mui/material';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search, SearchIconWrapper, StyledInputBase } from '../styles/searchAppBarStyles';
+import { videos, Video } from '../videosData';
 
 const SearchAppBar: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
+  const [filteredVideos, setFilteredVideos] = useState<Video[]>([]);
+  const navigate = useNavigate();
 
   const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
     if (
@@ -20,8 +24,28 @@ const SearchAppBar: React.FC = () => {
     ) {
       return;
     }
-
     setDrawerOpen(open);
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.target.value;
+    setSearchInput(input);
+    if (input) {
+      const filtered = videos.filter(video => video.description.toLowerCase().includes(input.toLowerCase()));
+      setFilteredVideos(filtered);
+    } else {
+      setFilteredVideos([]);
+    }
+  };
+
+  const handleClickAway = () => {
+    setFilteredVideos([]);
+  };
+
+  const handleVideoClick = (videoId: string) => {
+    navigate(`/video/${videoId}`);
+    setFilteredVideos([]);
+    setSearchInput('');
   };
 
   return (
@@ -46,15 +70,32 @@ const SearchAppBar: React.FC = () => {
           >
             SFlix
           </Typography>
-          <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Search…"
-              inputProps={{ 'aria-label': 'search' }}
-            />
-          </Search>
+          <Box sx={{ position: 'relative' }}>
+            <Search>
+              <SearchIconWrapper>
+                <SearchIcon />
+              </SearchIconWrapper>
+              <StyledInputBase
+                placeholder="Search…"
+                inputProps={{ 'aria-label': 'search' }}
+                value={searchInput}
+                onChange={handleSearchChange}
+              />
+            </Search>
+            {filteredVideos.length > 0 && (
+              <ClickAwayListener onClickAway={handleClickAway}>
+                <Paper sx={{ position: 'absolute', top: '40px', left: 0, right: 0, zIndex: 10 }}>
+                  <List>
+                    {filteredVideos.map(video => (
+                      <ListItem key={video.url} button onClick={() => handleVideoClick(video.url.split('v=')[1])}>
+                        <ListItemText primary={video.description} />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Paper>
+              </ClickAwayListener>
+            )}
+          </Box>
         </Toolbar>
       </AppBar>
       <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
